@@ -80,7 +80,8 @@
     "ua-parser-js": "^1.0.36",
     "winston": "^3.11.0",
     "winston-daily-rotate-file": "^4.7.1",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "global-agent": "^3.0.0"
   },
   "devDependencies": {
     "jest": "^29.5.0",

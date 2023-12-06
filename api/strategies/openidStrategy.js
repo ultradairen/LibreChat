@@ -5,6 +5,7 @@ const passport = require('passport');
 const { Issuer, Strategy: OpenIDStrategy } = require('openid-client');
 const { logger } = require('~/config');
 const User = require('~/models/User');
+require('global-agent/bootstrap');
 
 let crypto;
 try {

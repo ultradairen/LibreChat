@@ -27,6 +27,7 @@ services:
       - MONGO_URI=mongodb://mongodb:27017/LibreChat
       - MEILI_HOST=http://meilisearch:7700
       - MEILI_HTTP_ADDR=meilisearch:7700
+      - GLOBAL_AGENT_HTTP_PROXY=${PROXY}
     volumes:
       - /app/client/node_modules
       - /app/api/node_modules
@@ -75,6 +76,7 @@ services:
 
   # forwoard proxy for regular use
   squid:
+    hostname: squid
     image: ubuntu/squid
     networks:
       - internal_network
