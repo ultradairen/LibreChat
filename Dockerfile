@@ -1,6 +1,13 @@
 # Base node image
 FROM node:19-alpine AS node
 
+# Install mitmproxy cert
+RUN apk --no-cache add ca-certificates
+COPY  ./proxy/mitmproxy/cert/mitmproxy-ca-cert.cer /usr/local/share/ca-certificates/mitmproxy-ca-cert.crt
+RUN update-ca-certificates
+ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/mitmproxy-ca-cert.crt 
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+
 COPY . /app
 WORKDIR /app
 

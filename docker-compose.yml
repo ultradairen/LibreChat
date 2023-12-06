@@ -6,14 +6,16 @@ version: "3.4"
 services:
   api:
     container_name: LibreChat
-    ports:
-      - 3080:3080
+#    ports:
+#      - 3080:3080               # Change it to 9000:3080 to use nginx
     depends_on:
       - mongodb
     image: librechat
     build:
-      context: .
+      context:
       target: node
+    networks:
+      - internal_network
     restart: always
     user: "${UID}:${GID}"
     extra_hosts:
@@ -36,6 +38,8 @@ services:
   mongodb:
     container_name: chat-mongodb
     image: mongo
+    networks:
+      - internal_network
     restart: always
     user: "${UID}:${GID}"
     volumes:
@@ -44,6 +48,8 @@ services:
   meilisearch:
     container_name: chat-meilisearch
     image: getmeili/meilisearch:v1.5
+    networks:
+      - internal_network
     restart: always
     env_file:
       - .env
@@ -54,3 +60,47 @@ services:
       - MEILI_NO_ANALYTICS=true
     volumes:
       - ./meili_data_v1.5:/meili_data
+
+  # forwoard proxy for network analysis
+  mitmproxy:
+    build: ./proxy/mitmproxy
+    networks:
+      - internal_network
+      - bridge_network
+    ports:
+      - 8081:8081
+      - 8080:8080
+#    command: mitmweb --mode upstream:http://**** --upstream-auth ***:*** -k  --web-host 0.0.0.0
+    command: mitmweb -k --web-host 0.0.0.0
+
+  # forwoard proxy for regular use
+  squid:
+    image: ubuntu/squid
+    networks:
+      - internal_network
+      - bridge_network
+    ports:
+      - 3128:3128
+
+  # reverse proxy
+  haproxy:
+    image: haproxy:latest
+    restart: unless-stopped
+    volumes:
+      - ./proxy/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./proxy/haproxy/cert.pem/:/cert/cert.pem:ro
+      - ./proxy/haproxy/cert.pem.key/:/cert/cert.pem.key:ro
+    ports:
+      - "443:443"
+      - "80:80"
+    networks:
+      - internal_network
+      - bridge_network
+
+networks:
+  internal_network:
+    driver: bridge
+    internal: true
+
+  bridge_network:
+    driver: bridge
