@@ -81,6 +81,9 @@ services:
   squid:
     hostname: squid
     image: ubuntu/squid
+    volumes:
+      - ./proxy/squid/log/:/var/log/squid/
+      - ./proxy/squid/squid.conf:/etc/squid/squid.conf:ro
     networks:
       - internal_network
       - bridge_network
