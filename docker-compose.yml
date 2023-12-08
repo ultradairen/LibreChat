@@ -64,6 +64,8 @@ services:
 
   # forwoard proxy for network analysis
   mitmproxy:
+    depends_on:
+      - api
     build: ./proxy/mitmproxy
     networks:
       - internal_network
@@ -76,6 +78,8 @@ services:
 
   # forwoard proxy for regular use
   squid:
+    depends_on:
+      - api
     hostname: squid
     image: ubuntu/squid
     networks:
@@ -86,6 +90,8 @@ services:
 
   # reverse proxy
   haproxy:
+    depends_on:
+      - api
     image: haproxy:latest
     restart: unless-stopped
     volumes:
