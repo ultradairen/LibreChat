@@ -12,10 +12,9 @@ services:
       - mongodb
       - squid
       - mitmproxy
-      - haproxy
     image: librechat
     build:
-      context:
+      context: .
       target: node
     networks:
       - internal_network
@@ -93,6 +92,8 @@ services:
   # reverse proxy
   haproxy:
     image: haproxy:latest
+    depends_on:
+      - api
     restart: unless-stopped
     volumes:
       - ./proxy/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
