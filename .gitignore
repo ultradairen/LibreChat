@@ -81,3 +81,5 @@ auth.json
 /images
 
 !/proxy/**/*.pem
+
+/users/users.txt

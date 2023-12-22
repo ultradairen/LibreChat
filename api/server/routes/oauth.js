@@ -4,6 +4,8 @@ const router = express.Router();
 const { setAuthTokens } = require('~/server/services/AuthService');
 const { loginLimiter, checkBan } = require('~/server/middleware');
 const { logger } = require('~/config');
+const fs = require('fs').promises;
+const path = require('path');
 
 const domains = {
   client: process.env.DOMAIN_CLIENT,
@@ -12,12 +14,48 @@ const domains = {
 
 router.use(loginLimiter);
 
+const usersFilePath = path.join(__dirname, '../../../users/users.txt');
+let usersFileExists = true;
+
+fs.access(usersFilePath)
+  .then(() => (usersFileExists = true))
+  .catch(() => {
+    usersFileExists = false;
+    logger.warn('users.txt does not exist. User restrictions are not being enforced.');
+  });
+
 const oauthHandler = async (req, res) => {
   try {
     await checkBan(req, res);
     if (req.banned) {
       return;
     }
+
+    logger.info(`User logged in: ${req.user.email}`);
+    if (usersFileExists) {
+      try {
+        const data = await fs.readFile(usersFilePath, 'utf8');
+        const users = data.split('\n');
+        if (!users.includes(req.user.email)) {
+          res.status(403).send(`
+          <h1>You cannot log in because you are not registered in the system</h1>
+          <button onclick="location.href='/'">Back to Home</button>
+        `);
+          logger.warn(`User denied access: not listed in users.txt: ${req.user.email}`);
+          return;
+        }
+      } catch (err) {
+        if (err.code === 'ENOENT') {
+          // users.txt does not exist, log a warning and continue
+          logger.warn('users.txt does not exist. User restrictions are not being enforced.');
+        } else {
+          // An unexpected error occurred, log it and return
+          logger.error('Error reading users.txt:', err);
+          return;
+        }
+      }
+    }
+
     await setAuthTokens(req.user._id, res);
     res.redirect(domains.client);
   } catch (err) {
