@@ -35,7 +35,7 @@ const oauthHandler = async (req, res) => {
     if (usersFileExists) {
       try {
         const data = await fs.readFile(usersFilePath, 'utf8');
-        const users = data.split('\n');
+        const users = data.split(/(\r\n|\r|\n)/);
         if (!users.includes(req.user.email)) {
           res.status(403).send(`
           <h1>You cannot log in because you are not registered in the system</h1>
