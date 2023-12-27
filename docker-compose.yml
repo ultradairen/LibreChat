@@ -18,7 +18,7 @@ services:
       target: node
     networks:
       - internal_network
-    restart: always
+    restart: unless-stopped
     user: "${UID}:${GID}"
     extra_hosts:
     - "host.docker.internal:host-gateway"
@@ -45,7 +45,7 @@ services:
     image: mongo
     networks:
       - internal_network
-    restart: always
+    restart: unless-stopped
     user: "${UID}:${GID}"
     volumes:
       - ./data-node:/data/db
@@ -55,7 +55,7 @@ services:
     image: getmeili/meilisearch:v1.5
     networks:
       - internal_network
-    restart: always
+    restart: unless-stopped
     env_file:
       - .env
     user: "${UID}:${GID}"
@@ -82,6 +82,7 @@ services:
   squid:
     hostname: squid
     image: ubuntu/squid
+    restart: unless-stopped
     volumes:
       - ./proxy/squid/log/:/var/log/squid/
       - ./proxy/squid/squid.conf:/etc/squid/squid.conf:ro
