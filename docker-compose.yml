@@ -45,6 +45,9 @@ services:
     image: mongo
     networks:
       - internal_network
+    #   - bridge_network
+    # ports:
+    #   - 27018:27017
     restart: unless-stopped
     user: "${UID}:${GID}"
     volumes:
@@ -105,6 +108,20 @@ services:
     ports:
       - "443:443"
       - "80:80"
+    networks:
+      - internal_network
+      - bridge_network
+
+  # analytics
+  metabase:
+    image: metabase/metabase
+    restart: unless-stopped
+    ports:
+      - 3001:3000
+    volumes:
+      - ./metabase/data:/metabase.db
+    environment:
+      - MB_DB_FILE=/metabase.db
     networks:
       - internal_network
       - bridge_network

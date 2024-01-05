@@ -83,3 +83,5 @@ auth.json
 !/proxy/**/*.pem
 
 /users/users.txt
+
+/metabase/
